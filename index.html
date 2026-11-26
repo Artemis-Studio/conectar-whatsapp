@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex,nofollow">
+<title>Conectar WhatsApp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#F3EEE6;--soft:#ECE6DB;--ink:#15321B;--muted:#4d6152;--accent:#A8E87A;--accent-text:#3D6B27;--line:#d9d1c3;--warn:#8a3b12;--warn-bg:#fbe6d6}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--paper);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;font-size:16px;line-height:1.5}
+  main{max-width:560px;margin:0 auto;padding:28px 20px 48px}
+  .brand{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .glyph{width:20px;height:20px;background:var(--ink);clip-path:polygon(0 0,100% 0,100% 60%,60% 60%,60% 100%,0 100%)}
+  h1{font-size:28px;font-weight:500;line-height:1.2;margin:18px 0 6px}
+  h1 b{color:var(--accent-text);font-weight:500}
+  p{margin:0 0 12px}
+  .sub{color:var(--muted)}
+  .card{background:#fff8ef;border:1px solid var(--line);border-radius:14px;padding:20px;margin-top:18px}
+  .tabs{display:flex;gap:8px;margin-top:22px}
+  .tab{flex:1;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:10px;padding:12px 10px;font:inherit;font-weight:500;cursor:pointer}
+  .tab[aria-selected=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  ol{padding-left:20px;margin:0 0 14px}
+  li{margin-bottom:6px}
+  .btn{display:inline-block;width:100%;border:0;border-radius:10px;padding:14px 16px;font:inherit;font-weight:700;background:var(--accent);color:var(--ink);cursor:pointer}
+  .btn:disabled{opacity:.6;cursor:wait}
+  .btn.ghost{background:transparent;border:1px solid var(--line);font-weight:500;margin-top:10px}
+  .qr{display:flex;justify-content:center;align-items:center;min-height:280px;background:#fff;border-radius:12px;border:1px solid var(--line);margin:6px 0 10px}
+  .qr img{width:min(280px,100%);height:auto;image-rendering:pixelated}
+  .hint{font-size:13px;color:var(--muted);text-align:center}
+  .code{font-size:34px;font-weight:700;letter-spacing:.12em;text-align:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 8px;margin:6px 0 10px;font-variant-numeric:tabular-nums}
+  label{display:block;font-size:14px;font-weight:500;margin-bottom:6px}
+  input{width:100%;font:inherit;padding:12px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink);margin-bottom:12px}
+  .ok{border-color:var(--accent-text)}
+  .ok h2{color:var(--accent-text)}
+  h2{font-size:20px;font-weight:500;margin:0 0 8px}
+  .stat{font-size:28px;font-weight:700}
+  .warn{background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:12px 14px;font-size:14px;margin-top:12px}
+  .small{font-size:13px;color:var(--muted)}
+  .hidden{display:none!important}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent-text);margin-right:6px;animation:p 1.4s infinite}
+  @keyframes p{50%{opacity:.25}}
+</style>
+</head>
+<body>
+<main>
+  <div class="brand"><span class="glyph"></span>Conexão de WhatsApp</div>
+
+  <section id="bad" class="hidden">
+    <h1>Link incompleto</h1>
+    <p class="sub">Esse endereço precisa ser aberto exatamente como foi enviado. Peça o link de novo para quem te mandou.</p>
+  </section>
+
+  <section id="app" class="hidden">
+    <h1>Conectar o WhatsApp de <b id="nome"></b></h1>
+    <p class="sub">Isso liga o WhatsApp da linha da empresa como um aparelho extra, do mesmo jeito que o WhatsApp Web. O seu celular continua funcionando normal.</p>
+
+    <div id="escolha">
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" id="t-qr" aria-selected="true">Abri no computador</button>
+        <button class="tab" role="tab" id="t-cod" aria-selected="false">Abri no celular</button>
+      </div>
+
+      <div class="card" id="p-qr">
+        <ol>
+          <li>No celular, abra o <b>WhatsApp</b>.</li>
+          <li>Toque em <b>⋮</b> (Android) ou <b>Configurações</b> (iPhone) e depois em <b>Dispositivos conectados</b>.</li>
+          <li>Toque em <b>Conectar dispositivo</b> e aponte a câmera para o QR abaixo.</li>
+        </ol>
+        <button class="btn" id="b-qr">Mostrar QR code</button>
+        <div id="qr-box" class="hidden">
+          <div class="qr"><img id="qr-img" alt="QR code para conectar o WhatsApp"><span id="qr-wait" class="small">Gerando…</span></div>
+          <p class="hint"><span class="dot"></span>O QR muda sozinho a cada poucos segundos. Não precisa recarregar.</p>
+        </div>
+      </div>
+
+      <div class="card hidden" id="p-cod">
+        <p>Se você abriu este link no próprio celular, não dá pra escanear. Use um código:</p>
+        <label for="tel">Número do WhatsApp da empresa (com DDD)</label>
+        <input id="tel" inputmode="tel" autocomplete="tel" placeholder="(11) 91234-5678">
+        <button class="btn" id="b-cod">Gerar código</button>
+        <div id="cod-box" class="hidden">
+          <div class="code" id="cod"></div>
+          <ol>
+            <li>Copie ou decore o código acima.</li>
+            <li>No WhatsApp: <b>⋮</b> ou <b>Configurações</b> → <b>Dispositivos conectados</b> → <b>Conectar dispositivo</b>.</li>
+            <li>Toque em <b>Conectar com número de telefone</b> e digite o código.</li>
+          </ol>
+          <p class="hint">O código vale por pouco tempo. Se expirar, gere outro.</p>
+          <button class="btn ghost" id="b-cod2">Gerar outro código</button>
+        </div>
+      </div>
+      <p class="small" id="erro"></p>
+    </div>
+
+    <div class="card ok hidden" id="feito">
+      <h2>Conectado ✓</h2>
+      <p id="quem"></p>
+      <p class="small">Mensagens copiadas até agora</p>
+      <div class="stat" id="qtd">…</div>
+      <div class="warn"><b>Falta só uma coisa:</b> deixe o celular com internet e o WhatsApp aberto pela próxima <b>1 hora</b>. É nesse tempo que o histórico de conversas é copiado. Não remova o novo aparelho em "Dispositivos conectados".</div>
+    </div>
+
+    <div class="warn hidden" id="errado"></div>
+  </section>
+</main>
+<script>
+(() => {
+  const BASE = "https://evo.studioartemis.co";
+  const $ = (id) => document.getElementById(id);
+
+  // Link: #<base64url de {"i":instância,"k":token,"n":nome,"e":número esperado opcional}>
+  let cfg = null;
+  try {
+    const raw = location.hash.slice(1).replace(/-/g, "+").replace(/_/g, "/");
+    cfg = JSON.parse(decodeURIComponent(escape(atob(raw))));
+    if (!cfg.i || !cfg.k) cfg = null;
+  } catch (_) { cfg = null; }
+  if (!cfg) { $("bad").classList.remove("hidden"); return; }
+  $("app").classList.remove("hidden");
+  $("nome").textContent = cfg.n || cfg.i;
+  document.title = "Conectar WhatsApp · " + (cfg.n || cfg.i);
+
+  const inst = encodeURIComponent(cfg.i);
+  const api = async (path, opts = {}) => {
+    const r = await fetch(BASE + path, { ...opts, headers: { apikey: cfg.k, "Content-Type": "application/json" } });
+    const t = await r.text();
+    let j = null; try { j = JSON.parse(t); } catch (_) {}
+    if (!r.ok) throw new Error((j && (j.response?.message || j.message)) || ("HTTP " + r.status));
+    return j;
+  };
+  const so = (n) => String(n || "").replace(/\D/g, "");
+  const mesmoNumero = (a, b) => {
+    const norm = (n) => { let d = so(n).replace(/^55/, ""); if (d.length === 11 && d[2] === "9") d = d.slice(0, 2) + d.slice(3); return d; };
+    const x = norm(a), y = norm(b); return x.length >= 10 && x === y;
+  };
+  const fmt = (jid) => { const d = so(String(jid).split("@")[0]); return d ? "+" + d : ""; };
+  const erro = (m) => { $("erro").textContent = m || ""; };
+
+  // Abas
+  const aba = (qual) => {
+    $("t-qr").setAttribute("aria-selected", qual === "qr");
+    $("t-cod").setAttribute("aria-selected", qual === "cod");
+    $("p-qr").classList.toggle("hidden", qual !== "qr");
+    $("p-cod").classList.toggle("hidden", qual !== "cod");
+  };
+  $("t-qr").onclick = () => aba("qr");
+  $("t-cod").onclick = () => aba("cod");
+  if (/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent)) aba("cod");
+  if (cfg.e) $("tel").value = so(cfg.e).replace(/^55/, "");
+
+  // Estado
+  let conectado = false, timerQr = null, timerEstado = null, inicioQr = 0;
+  const pararQr = () => { clearInterval(timerQr); timerQr = null; };
+
+  async function estado() {
+    try {
+      const j = await api("/instance/connectionState/" + inst);
+      if (j?.instance?.state === "open") await aoConectar();
+    } catch (_) {}
+  }
+
+  async function infoInstancia() {
+    const lista = await api("/instance/fetchInstances?instanceName=" + inst);
+    return Array.isArray(lista) ? lista.find((x) => x.name === cfg.i) || lista[0] : null;
+  }
+
+  async function aoConectar() {
+    if (conectado) return;
+    conectado = true;
+    pararQr();
+    let info = null; try { info = await infoInstancia(); } catch (_) {}
+    if (cfg.e && info?.ownerJid && !mesmoNumero(info.ownerJid, cfg.e)) {
+      try { await api("/instance/logout/" + inst, { method: "DELETE" }); } catch (_) {}
+      conectado = false;
+      $("errado").textContent = "Esse WhatsApp (" + fmt(info.ownerJid) + ") não é o número esperado para esta conexão, então ela foi desfeita. Conecte usando o WhatsApp da linha da empresa.";
+      $("errado").classList.remove("hidden");
+      $("qr-box").classList.add("hidden"); $("cod-box").classList.add("hidden");
+      return;
+    }
+    $("escolha").classList.add("hidden");
+    $("errado").classList.add("hidden");
+    $("feito").classList.remove("hidden");
+    const nome = info?.profileName ? info.profileName + " · " : "";
+    $("quem").textContent = nome + fmt(info?.ownerJid || "");
+    clearInterval(timerEstado);
+    const contar = async () => {
+      try { const i = await infoInstancia(); $("qtd").textContent = (i?._count?.Message ?? 0).toLocaleString("pt-BR"); } catch (_) {}
+    };
+    contar(); setInterval(contar, 10000);
+  }
+
+  // QR
+  async function puxarQr() {
+    if (conectado) return;
+    if (Date.now() - inicioQr > 4 * 60_000) {
+      pararQr();
+      $("qr-box").classList.add("hidden");
+      $("b-qr").classList.remove("hidden");
+      $("b-qr").textContent = "Mostrar QR de novo";
+      erro("O QR ficou parado por muito tempo e foi pausado. Clique para gerar outro.");
+      return;
+    }
+    try {
+      const j = await api("/instance/connect/" + inst);
+      if (j?.instance?.state === "open") return aoConectar();
+      if (j?.base64) { $("qr-img").src = j.base64; $("qr-img").classList.remove("hidden"); $("qr-wait").classList.add("hidden"); erro(""); }
+    } catch (e) { erro("Não consegui falar com o servidor (" + e.message + "). Tentando de novo…"); }
+  }
+  $("b-qr").onclick = () => {
+    erro(""); inicioQr = Date.now();
+    $("b-qr").classList.add("hidden");
+    $("qr-box").classList.remove("hidden");
+    $("qr-img").classList.add("hidden"); $("qr-wait").classList.remove("hidden");
+    puxarQr(); pararQr(); timerQr = setInterval(puxarQr, 5000);
+  };
+
+  // Código de pareamento
+  async function gerarCodigo() {
+    erro("");
+    let d = so($("tel").value);
+    if (d.length < 10) { erro("Digite o número com DDD."); return; }
+    if (!d.startsWith("55")) d = "55" + d;
+    pararQr();
+    const b1 = $("b-cod"), b2 = $("b-cod2");
+    b1.disabled = b2.disabled = true; b1.textContent = "Gerando…";
+    try {
+      let j = await api("/instance/connect/" + inst + "?number=" + d);
+      if (!j?.pairingCode) {
+        try { await api("/instance/restart/" + inst, { method: "POST" }); } catch (_) {}
+        await new Promise((r) => setTimeout(r, 2500));
+        j = await api("/instance/connect/" + inst + "?number=" + d);
+      }
+      if (j?.instance?.state === "open") return aoConectar();
+      if (!j?.pairingCode) throw new Error("o servidor não devolveu o código");
+      const c = String(j.pairingCode).replace(/[^A-Z0-9]/gi, "");
+      $("cod").textContent = c.length === 8 ? c.slice(0, 4) + "-" + c.slice(4) : c;
+      $("cod-box").classList.remove("hidden");
+    } catch (e) {
+      erro("Não deu pra gerar o código (" + e.message + "). Tente de novo em alguns segundos ou use o QR em um computador.");
+    } finally { b1.disabled = b2.disabled = false; b1.textContent = "Gerar código"; }
+  }
+  $("b-cod").onclick = gerarCodigo;
+  $("b-cod2").onclick = gerarCodigo;
+
+  estado();
+  timerEstado = setInterval(estado, 3000);
+})();
+</script>
+</body>
+</html>
